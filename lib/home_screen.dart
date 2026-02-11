@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'login_screen.dart';
+import 'package:url_launcher/url_launcher.dart'; // 1. IMPORT ADDED
 
 class HomeScreen extends StatefulWidget {
   final String username;
@@ -22,6 +23,17 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadAppData();
   }
 
+  // 2. FUNCTION TO OPEN EXTERNAL APP/BROWSER
+  Future<void> _launchBookingUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      // If app is not found, it opens in browser automatically
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Could not open $urlString")),
+      );
+    }
+  }
+
   Future<void> _loadAppData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -31,47 +43,52 @@ class _HomeScreenState extends State<HomeScreen> {
     String currentTime = DateTime.now().toString().split('.')[0];
     await prefs.setString('last_visit_time', "Last seen: $currentTime");
 
-    // Simulating API Call
     await Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
-          // UPDATED MOVIE DATA WITH INR PRICES (₹)
+          // 3. ADDED 'url' FOR BOOKING LINKS
           _movies = [
             {
               "title": "Captain America: BNW",
               "price": "₹450",
               "image":
-                  "https://upload.wikimedia.org/wikipedia/en/2/23/Captain_America_Brave_New_World_poster.jpg"
+                  "https://upload.wikimedia.org/wikipedia/en/2/23/Captain_America_Brave_New_World_poster.jpg",
+              "url": "https://in.bookmyshow.com/explore/movies" // Direct Link
             },
             {
               "title": "Superman (2025)",
               "price": "₹500",
               "image":
-                  "https://upload.wikimedia.org/wikipedia/en/3/3d/Superman_%282025_film%29_poster.jpg"
+                  "https://upload.wikimedia.org/wikipedia/en/3/3d/Superman_%282025_film%29_poster.jpg",
+              "url": "https://paytm.com/movies"
             },
             {
               "title": "Avatar: Fire & Ash",
               "price": "₹800",
               "image":
-                  "https://upload.wikimedia.org/wikipedia/en/5/54/Avatar_The_Way_of_Water_poster.jpg"
+                  "https://upload.wikimedia.org/wikipedia/en/5/54/Avatar_The_Way_of_Water_poster.jpg",
+              "url": "https://in.bookmyshow.com/"
             },
             {
               "title": "Mufasa: Lion King",
               "price": "₹350",
               "image":
-                  "https://upload.wikimedia.org/wikipedia/en/c/c8/Mufasa_The_Lion_King_poster.jpg"
+                  "https://upload.wikimedia.org/wikipedia/en/c/c8/Mufasa_The_Lion_King_poster.jpg",
+              "url": "https://www.google.com/search?q=book+mufasa+movie+tickets"
             },
             {
               "title": "Fantastic Four",
               "price": "₹420",
               "image":
-                  "https://upload.wikimedia.org/wikipedia/en/0/07/The_Fantastic_Four_First_Steps_poster.jpg"
+                  "https://upload.wikimedia.org/wikipedia/en/0/07/The_Fantastic_Four_First_Steps_poster.jpg",
+              "url": "https://in.bookmyshow.com/"
             },
             {
               "title": "Thunderbolts*",
               "price": "₹380",
               "image":
-                  "https://upload.wikimedia.org/wikipedia/en/6/63/Thunderbolts%2A_poster.jpg"
+                  "https://upload.wikimedia.org/wikipedia/en/6/63/Thunderbolts%2A_poster.jpg",
+              "url": "https://in.bookmyshow.com/"
             },
           ];
           _isLoading = false;
@@ -123,7 +140,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          // Last Visit Banner
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(10),
@@ -135,8 +151,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontWeight: FontWeight.bold, color: Colors.brown),
             ),
           ),
-
-          // Movie Grid
           Expanded(
             child: _isLoading
                 ? const Center(
@@ -146,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.65, // Taller cards for Movie Posters
+                      childAspectRatio: 0.65,
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
                     ),
@@ -159,7 +173,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Movie Poster
                             Expanded(
                               child: ClipRRect(
                                 borderRadius: const BorderRadius.vertical(
@@ -173,7 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ),
-                            // Details
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(
@@ -197,11 +209,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                     width: double.infinity,
                                     height: 30,
                                     child: ElevatedButton(
-                                      onPressed: () {},
+                                      // 4. CALL THE LAUNCH FUNCTION HERE
+                                      onPressed: () =>
+                                          _launchBookingUrl(_movies[i]['url']!),
                                       style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.redAccent,
                                           foregroundColor: Colors.white),
-                                      child: const Text("Book"),
+                                      child: const Text("Book Now"),
                                     ),
                                   )
                                 ],
@@ -218,3 +232,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+git add .
