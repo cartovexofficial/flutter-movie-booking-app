@@ -44,7 +44,14 @@ class _PaymentScreenState extends State<PaymentScreen>
     super.dispose();
   }
 
-  String get _seatString => widget.selectedSeats.map((s) => 'S${s + 1}').join(', ');
+  String get _seatString {
+    return widget.selectedSeats.map((s) {
+      int row = s ~/ 8;
+      int col = s % 8;
+      String rowLetter = String.fromCharCode(65 + row);
+      return '$rowLetter${col + 1}';
+    }).join(', ');
+  }
   
   String get _priceString {
     int baseUnitPrice = widget.cinema?.priceFor('Regular') ?? widget.movie.basePrice;
